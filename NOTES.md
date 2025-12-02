@@ -12,7 +12,7 @@
 - createTodo() tidak melakukan pengecekan apakah userId valid atau user benar-benar ada di userRepo.
 
 **Fix:**
-- Tambahkan pengecekan await userRepo.findById(userId) lalu throw error jika user tidak ditemukan.
+- Tambahkan pengecekan await userRepo.findById(userId) lalu return kondisi jika user tidak ditemukan.
 
 **Impact:**
 - Todo bisa dibuat untuk user fiktif atau data menjadi tidak konsisten.
@@ -36,7 +36,14 @@
 - new Date(data.remindAt) bisa menghasilkan "Invalid Date" tanpa validasi.
 
 **Fix:**
-- Tambahkan check: if (isNaN(new Date(remindAt).getTime())) throw Error("Invalid remindAt").
+- Tambahkan check:  let remindDate;
+                    if (data.remindAt) {
+                    const parsed = new Date(data.remindAt);
+                        if (isNaN(parsed.getTime())) {
+                          return { statusCode: 400, data: { error: "Format reminderAt tidak valid" } };
+                        }
+                        remindDate = parsed;
+                    }
 
 **Impact:**
 - Data todo bisa menyimpan tanggal invalid atau proses reminder menjadi tidak stabil.

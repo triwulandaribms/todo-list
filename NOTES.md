@@ -324,8 +324,8 @@ npm test
 
 If I had more time, I would add/improve:
 
-1.
-2.
+1. menambahkan bagian autentikasi
+2. 
 3.
 
 ---

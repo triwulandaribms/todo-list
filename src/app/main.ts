@@ -1,31 +1,40 @@
-import { InMemoryUserRepository } from "../infra/InMemoryUserRepository";
-import { InMemoryTodoRepository } from "../infra/InMemoryTodoRepository";
+import express from "express";
+import { SequelizeUserRepository } from "../infra/repository/UserRepository";
+import { SequelizeTodoRepository } from "../infra/repository/TodoRepository";
 import { SimpleScheduler } from "../infra/SimpleScheduler";
 import { TodoService } from "../core/TodoService";
+import { UserService } from "../core/UserService";
+import { database } from "../infra/config/database";
+import { createUserRoutes } from "../infra/routes/UserRoute";
+import { createTodoRoutes } from "../infra/routes/TodoRoute";
 
 async function bootstrap() {
-  // Wire up dependencies
-  const userRepo = new InMemoryUserRepository();
-  const todoRepo = new InMemoryTodoRepository();
+
+  await database();
+
+  const userRepo = new SequelizeUserRepository();
+  const todoRepo = new SequelizeTodoRepository();
   const scheduler = new SimpleScheduler();
+
+  const userService = new UserService(userRepo);
   const todoService = new TodoService(todoRepo, userRepo);
 
-  console.log("Todo Reminder Service - Bootstrap Complete");
-  console.log("Repositories and services initialized.");
-  console.log("Note: HTTP server implementation left for candidate to add.");
+  scheduler.scheduleRecurring(
+    "reminder-check",
+    60000, 
+    () => todoService.processReminders(new Date())
+  );
 
-  // Candidate should implement HTTP server here
-  // Example: scheduler.scheduleRecurring('reminder-check', 60000, () => todoService.processReminders());
+  const app = express();
+  app.use(express.json());
 
-  // TODO: Implement HTTP server with the following routes:
-  // POST /users - Create a new user
-  // GET /users/:id - Get user by ID
-  // POST /todos - Create a new todo
-  // GET /todos/:id - Get todo by ID
-  // PUT /todos/:id - Update a todo
-  // DELETE /todos/:id - Delete a todo
-  // GET /users/:userId/todos - Get all todos for a user
-  // POST /todos/:id/share - Share a todo with another user
+  app.use("/users", createUserRoutes(userService));
+  app.use("/todos", createTodoRoutes(todoService));
+
+  app.listen(3000, () => {
+    console.log("Server berjalan di port 3000");
+  });
+
 }
 
 bootstrap().catch(console.error);

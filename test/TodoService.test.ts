@@ -2,7 +2,6 @@ import { TodoService } from "../src/core/TodoService";
 import { InMemoryTodoRepository } from "../src/infra/InMemoryTodoRepository";
 import { InMemoryUserRepository } from "../src/infra/InMemoryUserRepository";
 import { User } from "../src/domain/User";
-import { Todo } from "../src/domain/Todo";
 
 describe("TodoService", () => {
   let todoService: TodoService;
@@ -15,7 +14,6 @@ describe("TodoService", () => {
     userRepo = new InMemoryUserRepository();
     todoService = new TodoService(todoRepo, userRepo);
 
-    // Create a test user
     testUser = await userRepo.create({
       email: "test@example.com",
       name: "Test User",
@@ -43,7 +41,7 @@ describe("TodoService", () => {
     });
 
     it("should create a todo with reminder date", async () => {
-      const remindAt = new Date(Date.now() + 3600000); // 1 hour from now
+      const remindAt = new Date(Date.now() + 3600000); 
       const todoData = {
         userId: testUser.id,
         title: "Call dentist",
@@ -120,7 +118,7 @@ describe("TodoService", () => {
 
   describe("processReminders - happy path", () => {
     it("should mark due reminders as REMINDER_DUE", async () => {
-      const pastDate = new Date(Date.now() - 3600000); // 1 hour ago
+      const pastDate = new Date(Date.now() - 3600000); 
 
       const todo = await todoService.createTodo({
         userId: testUser.id,
@@ -137,7 +135,7 @@ describe("TodoService", () => {
     });
 
     it("should not process future reminders", async () => {
-      const futureDate = new Date(Date.now() + 3600000); // 1 hour from now
+      const futureDate = new Date(Date.now() + 3600000); 
 
       const todo = await todoService.createTodo({
         userId: testUser.id,
@@ -191,7 +189,6 @@ describe("TodoService", () => {
       const todos2 = await todoService.getTodosByUser(testUser.id);
       const todo2 = todos2.find((t) => t.id === todo.id);
 
-      // Should be the same after multiple processings
       expect(todo2?.status).toBe("REMINDER_DUE");
       expect(todo2?.status).toBe(todo1?.status);
     });
@@ -226,4 +223,86 @@ describe("TodoService", () => {
       expect(todos).toHaveLength(0);
     });
   });
+
+
+  describe("soft delete & pagination", () => {
+
+    describe("soft delete", () => {
+      it("should soft-delete a todo", async () => {
+        const todo = await todoService.createTodo({
+          userId: testUser.id,
+          title: "Task to delete",
+        });
+  
+        await todoService.deleteTodo(todo.id);
+  
+        const todos = await todoService.getTodosByUser(testUser.id);
+  
+        expect(todos.find(t => t.id === todo.id)).toBeUndefined();
+      });
+
+      it("should throw error when deleting non-existent todo", async () => {
+        await expect(todoService.deleteTodo("nonexistent-id"))
+          .rejects
+          .toThrow("Todo tidak ditemukan");
+      });
+    });
+  
+    
+    describe("pagination", () => {
+      beforeEach(async () => {
+        for (let i = 1; i <= 15; i++) {
+          await todoService.createTodo({
+            userId: testUser.id,
+            title: `Task ${i}`,
+          });
+        }
+      });
+  
+      it("should return correct number of items with limit", async () => {
+        const { rows, count } = await todoService.getTodosPagination(
+          testUser.id,
+          5, 
+          0  
+        );
+  
+        expect(count).toBe(15);   
+        expect(rows.length).toBe(5);
+      });
+  
+      it("should return correct page using offset", async () => {
+        const { rows } = await todoService.getTodosPagination(
+          testUser.id,
+          5,  
+          5    
+        );
+  
+        expect(rows.length).toBe(5);
+        expect(rows[0].title).toBe("Task 10"); 
+      });
+  
+      it("should return empty array when offset is past total", async () => {
+        const { rows } = await todoService.getTodosPagination(
+          testUser.id,
+          5,
+          100 
+        );
+  
+        expect(rows.length).toBe(0);
+      });
+  
+      it("should not include soft-deleted todos in pagination", async () => {
+        const todos = await todoService.getTodosPagination(testUser.id, 5, 0);
+  
+        await todoService.deleteTodo(todos.rows[0].id);
+  
+        const afterDelete = await todoService.getTodosPagination(testUser.id, 20, 0);
+  
+        expect(afterDelete.count).toBe(14);   
+        expect(afterDelete.rows.length).toBe(14);
+      });
+    });
+  
+  });
+  
 });

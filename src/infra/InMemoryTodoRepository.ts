@@ -26,40 +26,75 @@ export class InMemoryTodoRepository implements ITodoRepository {
     updates: Partial<Omit<Todo, "id" | "userId" | "createdAt">>
   ): Promise<Todo | null> {
     const index = this.todos.findIndex((t) => t.id === id);
+    if (index === -1) return null;
 
-    if (index === -1) {
-      const newTodo: Todo = {
-        id,
-        userId: (updates as any).userId || "unknown",
-        title: (updates as any).title || "Untitled",
-        status: updates.status || "PENDING",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        ...updates,
-      };
-      this.todos.push(newTodo);
-      return newTodo;
+    const old = this.todos[index];
+
+    let newUpdatedAt = new Date();
+    if (newUpdatedAt.getTime() <= old.updatedAt.getTime()) {
+      newUpdatedAt = new Date(old.updatedAt.getTime() + 1);
     }
 
     this.todos[index] = {
-      ...this.todos[index],
+      ...old,
       ...updates,
-      updatedAt: new Date(),
+      updatedAt: newUpdatedAt,
     };
 
     return this.todos[index];
   }
 
   async findById(id: string): Promise<Todo | null> {
-    const todo = this.todos.find((t) => t.id == id);
+    const todo = this.todos.find((t) => t.id === id && !t.deletedAt);
     return todo || null;
   }
+  
 
   async findByUserId(userId: string): Promise<Todo[]> {
-    return this.todos.filter((t) => t.userId === userId);
+    return this.todos.filter((t) => 
+      t.userId === userId && !t.deletedAt
+    );
   }
+  
 
   async findDueReminders(currentTime: Date): Promise<Todo[]> {
     return this.todos.filter((t) => t.remindAt && t.remindAt <= currentTime);
   }
+
+  async deleteSoft(id: string): Promise<void> {
+    const index = this.todos.findIndex((t) => t.id === id);
+    if (index !== -1) {
+      this.todos[index].deletedAt = new Date();
+    }
+  }
+
+ 
+  async findByUserIdPagination(
+    userId: string,
+    limit: number,
+    offset: number
+  ): Promise<{ rows: Todo[]; count: number }> {
+  
+    const filtered = this.todos
+      .filter((t) => t.userId === userId && !t.deletedAt)
+      .sort((a, b) => {
+
+        const diff = b.createdAt.getTime() - a.createdAt.getTime();
+        if (diff !== 0) return diff;
+
+        const aNum = parseInt(a.title.replace("Task ", ""));
+        const bNum = parseInt(b.title.replace("Task ", ""));
+        return bNum - aNum;
+      });
+  
+    const rows = filtered.slice(offset, offset + limit);
+  
+    return {
+      rows,
+      count: filtered.length,
+    };
+  }
+  
+    
+  
 }

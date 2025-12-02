@@ -9,4 +9,12 @@ export interface ITodoRepository {
   findById(id: string): Promise<Todo | null>;
   findByUserId(userId: string): Promise<Todo[]>;
   findDueReminders(currentTime: Date): Promise<Todo[]>;
+  
+  deleteSoft(id: string): Promise<void>;
+  findByUserIdPagination(
+    userId: string,
+    limit: number,
+    offset: number
+  ): Promise<{ rows: Todo[]; count: number }>;
+
 }

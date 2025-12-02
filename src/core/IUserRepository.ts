@@ -4,4 +4,5 @@ export interface IUserRepository {
   create(user: Omit<User, "id" | "createdAt">): Promise<User>;
   findById(id: string): Promise<User | null>;
   findAll(): Promise<User[]>;
+  findByEmail(email: string): Promise<User | null>;
 }

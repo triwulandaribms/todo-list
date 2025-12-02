@@ -18,6 +18,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/express": "^5.0.5",
     "@types/jest": "^29.5.11",
     "@types/node": "^20.10.6",
     "jest": "^29.7.0",
@@ -27,5 +28,14 @@
   },
   "directories": {
     "test": "test"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.11",
+    "pg": "^8.16.3",
+    "pg-hstore": "^2.3.4",
+    "postgres": "^3.4.7",
+    "sequelize": "^6.37.7"
   }
 }

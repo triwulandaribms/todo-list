@@ -2,7 +2,7 @@
 
 **Candidate:** [Tri Wulandari]  
 **Date:** [01 Desember 2025]  
-**Time Spent:** [180 hours / 3 days]
+**Time Spent:** [72 hours / 3 days]
 
 ## Main Bugs/Issues Found
 
@@ -304,7 +304,7 @@ npm test
 - [ ] Logging
 - [ ] Docker Setup
 - [v] Environment Configuration
-- [ ] Integration Tests
+- [v] Integration Tests
 - [v] API Documentation
 - [ ] Health Check Endpoint
 - [ ] Other: ******\_\_\_******

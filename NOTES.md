@@ -2,7 +2,7 @@
 
 **Candidate:** [Tri Wulandari]  
 **Date:** [01 Desember 2025]  
-**Time Spent:** [72 hours / 3 days]
+**Time Spent:** [ 48 hours ]
 
 ## Main Bugs/Issues Found
 

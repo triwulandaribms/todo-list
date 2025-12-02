@@ -10,6 +10,7 @@
 
 **Issue:**
 - Ketika jalanin test muncul "reject whitespace-only title"
+  
 **Fix:**  
   - Code sebelumnya 
   ```bash
@@ -31,6 +32,7 @@
 
 **Issue:**  
 - Ketika jalanin test muncul "updatedAt must increase" 
+  
 **Fix:**  
   - Code sebelumnya
   ```bash
@@ -53,14 +55,16 @@
    ```
    - Penjelasannya bahwa untuk function update() dimana timestamp pada updatedAt tidak selalu lebih besar
      maka agar timestamp supaya updatedAt selalu lebih besar harus edit bagian logicnya
+
 **Impact:**
 - Test sekarang PASS.
-- 
+  
 
 ### 3. [TEST/TodoService]
 
 **Issue:**  
 - Ketika jalanin test muncul “ignore DONE todos when processing reminders”
+  
 **Fix:**  
   - Code sebelumnya
   ```bash
@@ -84,6 +88,7 @@
     }
     ``` 
   - Penjelasan bahwa untuk function prosesReminders() agar TODO yang DONE tidak berubah lagi 
+  
 **Impact:**
 Test  sekarang PASS.
 

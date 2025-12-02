@@ -6,7 +6,78 @@
 
 ## Main Bugs/Issues Found
 
-### 1. [TEST/TodoService]
+### 1. [TodoService.createTodo – Missing User Validation]
+
+**Issue:**
+- createTodo() tidak melakukan pengecekan apakah userId valid atau user benar-benar ada di userRepo.
+
+**Fix:**
+- Tambahkan pengecekan await userRepo.findById(userId) lalu throw error jika user tidak ditemukan.
+
+**Impact:**
+- Todo bisa dibuat untuk user fiktif atau data menjadi tidak konsisten.
+
+
+### 2. [TodoService.processReminders – No Status Filtering]
+
+**Issue:**
+- processReminders() tidak mengecek apakah status todo masih PENDING. DONE atau REMINDER_DUE juga ikut diproses.
+
+**Fix:**
+- Filter hanya todos dengan status = "PENDING".
+
+**Impact:**
+- State transition kacau atau DONE bisa berubah menjadi REMINDER_DUE.
+
+
+### 3. [TodoService.createTodo – Invalid remindAt Date]
+
+**Issue:**
+- new Date(data.remindAt) bisa menghasilkan "Invalid Date" tanpa validasi.
+
+**Fix:**
+- Tambahkan check: if (isNaN(new Date(remindAt).getTime())) throw Error("Invalid remindAt").
+
+**Impact:**
+- Data todo bisa menyimpan tanggal invalid atau proses reminder menjadi tidak stabil.
+
+
+### 4. [InMemoryTodoRepository.update – Creates New Entity if ID Not Found]
+
+**Issue:**
+- Jika ID tidak ditemukan, update() malah membuat todo baru.
+
+**Fix:**
+- Ubah behavior: jika index = -1 → return null, jangan membuat todo baru.
+
+**Impact:**
+- Kesalahan input ID menghasilkan data baru yang tidak diinginkan → fatal data corruption.
+
+
+### 5. [TodoService.completeTodo – Missing Status Handling]
+
+**Issue:**
+- Complete Todo tidak mempertimbangkan status lain seperti REMINDER_DUE.
+
+**Fix:**
+- Tambahkan rules: misalnya hanya PENDING yang bisa menjadi DONE, atau definisikan business rule.
+
+**Impact:**
+- State machine tidak jelas, bisa menghasilkan transisi status yang salah.
+
+
+### 6. [InMemoryTodoRepository.findDueReminders – No Status Check]
+
+**Issue:**
+- findDueReminders mengambil semua todo yang remindAt ≤ now tanpa cek status PENDING.
+
+**Fix:**
+- Filter: t.status === "PENDING".
+
+**Impact:**
+- TODO DONE ikut masuk batch reminder → reminder menjadi salah.
+
+### 7. [TEST/TodoService]
 
 **Issue:**
 - Ketika jalanin test muncul "reject whitespace-only title"
@@ -28,7 +99,7 @@
 **Impact:**
 - Test sekarang pasti PASS.
 
-### 2. [TEST/InMemoryTodoRepository]
+### 8. [TEST/InMemoryTodoRepository]
 
 **Issue:**  
 - Ketika jalanin test muncul "updatedAt must increase" 
@@ -60,7 +131,7 @@
 - Test sekarang PASS.
   
 
-### 3. [TEST/TodoService]
+### 9. [TEST/TodoService]
 
 **Issue:**  
 - Ketika jalanin test muncul “ignore DONE todos when processing reminders”
@@ -88,41 +159,10 @@
     }
     ``` 
   - Penjelasan bahwa untuk function prosesReminders() agar TODO yang DONE tidak berubah lagi 
-  
+
 **Impact:**
 Test  sekarang PASS.
 
-### 4. [create/TodoService]
-**Issue:**
-**Fix:**
-**Impact:**
-
-### 5. [processReminders/TodoService]
-**Issue:**
-- belum ada pengecekan PENDING ketika todo
-**Fix:**
-**Impact:**
-
-### 6. [update/infra/InMemoryTodoRepository]
-**Issue:**
-- ketika update melakukan push data
-**Fix:**
-**Impact:**
-
-### 7. [Bug Name/Location]
-**Issue:**
-**Fix:**
-**Impact:**
-
-### 8. [Bug Name/Location]
-**Issue:**
-**Fix:**
-**Impact:**
-
-### 9. [Bug Name/Location]
-**Issue:**
-**Fix:**
-**Impact:**
 
 ### 10. [Bug Name/Location]
 **Issue:**

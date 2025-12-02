@@ -1,4 +1,3 @@
-// import { User } from "../domain/User";
 import { IUserRepository } from "./IUserRepository";
 
 export class UserService {

@@ -15,6 +15,7 @@ export class InMemoryTodoRepository implements ITodoRepository {
       id,
       createdAt: now,
       updatedAt: now,
+      deletedAt: null,    
     };
 
     this.todos.push(todo);
@@ -35,30 +36,28 @@ export class InMemoryTodoRepository implements ITodoRepository {
       newUpdatedAt = new Date(old.updatedAt.getTime() + 1);
     }
 
-    this.todos[index] = {
+    const updated = {
       ...old,
       ...updates,
       updatedAt: newUpdatedAt,
     };
 
-    return this.todos[index];
+    this.todos[index] = updated;
+    return updated;
   }
 
   async findById(id: string): Promise<Todo | null> {
-    const todo = this.todos.find((t) => t.id === id && !t.deletedAt);
-    return todo || null;
+    return this.todos.find((t) => t.id === id && t.deletedAt === null) || null;
   }
-  
 
   async findByUserId(userId: string): Promise<Todo[]> {
-    return this.todos.filter((t) => 
-      t.userId === userId && !t.deletedAt
-    );
+    return this.todos.filter((t) => t.userId === userId && t.deletedAt === null);
   }
-  
 
   async findDueReminders(currentTime: Date): Promise<Todo[]> {
-    return this.todos.filter((t) => t.remindAt && t.remindAt <= currentTime);
+    return this.todos.filter(
+      (t) => t.remindAt && t.remindAt <= currentTime && t.deletedAt === null
+    );
   }
 
   async deleteSoft(id: string): Promise<void> {
@@ -68,17 +67,14 @@ export class InMemoryTodoRepository implements ITodoRepository {
     }
   }
 
- 
   async findByUserIdPagination(
     userId: string,
     limit: number,
     offset: number
   ): Promise<{ rows: Todo[]; count: number }> {
-  
     const filtered = this.todos
-      .filter((t) => t.userId === userId && !t.deletedAt)
+      .filter((t) => t.userId === userId && t.deletedAt === null)
       .sort((a, b) => {
-
         const diff = b.createdAt.getTime() - a.createdAt.getTime();
         if (diff !== 0) return diff;
 
@@ -86,15 +82,12 @@ export class InMemoryTodoRepository implements ITodoRepository {
         const bNum = parseInt(b.title.replace("Task ", ""));
         return bNum - aNum;
       });
-  
+
     const rows = filtered.slice(offset, offset + limit);
-  
+
     return {
       rows,
       count: filtered.length,
     };
   }
-  
-    
-  
 }

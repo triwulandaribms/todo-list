@@ -5,8 +5,8 @@ import { SimpleScheduler } from "../infra/SimpleScheduler";
 import { TodoService } from "../core/TodoService";
 import { UserService } from "../core/UserService";
 import { database } from "../infra/config/database";
-import { createUserRoutes } from "../infra/routes/UserRoute";
-import { createTodoRoutes } from "../infra/routes/TodoRoute";
+import { createUserRoutes } from "../infra/routes/userRoute";
+import { createTodoRoutes } from "../infra/routes/todoRoute";
 
 async function bootstrap() {
 

@@ -5,32 +5,52 @@ export function createTodoRoutes(todoService: TodoService) {
   const router = Router();
 
   router.post("/add", async (req, res) => {
-    const result = await todoService.createTodo(req.body);
-    return res.status(result.statusCode).json(result.data);
+    try {
+      const todo = await todoService.createTodo(req.body);
+      return res.status(201).json(todo);
+    } catch (err: any) {
+      return res.status(400).json({ message: err.message });
+    }
   });
 
   router.get("/get", async (req, res) => {
-    const result = await todoService.getTodosByUser(req.query.userId as string);
-    return res.status(result.statusCode).json(result.data);
+    try {
+      const todos = await todoService.getTodosByUser(req.query.userId as string);
+      return res.status(200).json(todos);
+    } catch (err: any) {
+      return res.status(400).json({ message: err.message });
+    }
   });
 
-  router.patch("/complete/:id/complete", async (req, res) => {
-    const result = await todoService.completeTodo(req.params.id);
-    return res.status(result.statusCode).json(result.data);
+  router.patch("/complete/:id", async (req, res) => {
+    try {
+      const updated = await todoService.completeTodo(req.params.id);
+      return res.status(200).json(updated);
+    } catch (err: any) {
+      return res.status(400).json({ message: err.message });
+    }
   });
 
   router.get("/get/pagination", async (req, res) => {
-    const userId = req.query.userId as string;
-    const limit = Number(req.query.limit || 10);
-    const offset = Number(req.query.offset || 0);
+    try {
+      const userId = req.query.userId as string;
+      const limit = Number(req.query.limit || 10);
+      const offset = Number(req.query.offset || 0);
 
-    const result = await todoService.getTodosPagination(userId, limit, offset);
-    return res.status(result.statusCode).json(result.data);
+      const result = await todoService.getTodosPagination(userId, limit, offset);
+      return res.status(200).json(result);
+    } catch (err: any) {
+      return res.status(400).json({ message: err.message });
+    }
   });
 
   router.delete("/delete/:id", async (req, res) => {
-    const result = await todoService.deleteTodo(req.params.id);
-    return res.status(result.statusCode).json(result.data);
+    try {
+      await todoService.deleteTodo(req.params.id);
+      return res.status(200).json({ message: "Deleted successfully" });
+    } catch (err: any) {
+      return res.status(400).json({ message: err.message });
+    }
   });
 
   return router;

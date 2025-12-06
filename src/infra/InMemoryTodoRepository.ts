@@ -56,7 +56,8 @@ export class InMemoryTodoRepository implements ITodoRepository {
 
   async findDueReminders(currentTime: Date): Promise<Todo[]> {
     return this.todos.filter(
-      (t) => t.remindAt && t.remindAt <= currentTime && t.deletedAt === null
+      (t) => 
+        t.remindAt && t.remindAt <= currentTime && t.deletedAt === null && t.status === "PENDING"
     );
   }
 
